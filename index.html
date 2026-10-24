@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090b16">
+  <title>MotionForge AI - Video Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">✦ MotionForge <span>AI</span></div>
+    <div class="status">● AI Studio</div>
+  </header>
+
+  <main class="container">
+
+    <section class="hero">
+      <p class="eyebrow">YOUR IDEAS, IN MOTION</p>
+      <h1>Turn imagination into<br>
+        <span>moving stories.</span>
+      </h1>
+      <p class="subtitle">
+        Create videos from your images and text prompts.
+      </p>
+    </section>
+
+    <section class="studio">
+
+      <div class="panel">
+        <h2>✦ Create your video</h2>
+
+        <div class="tabs">
+          <button id="imageMode" class="active" type="button">
+            Image to Video
+          </button>
+          <button id="promptMode" type="button">
+            Prompt to Video
+          </button>
+        </div>
+
+        <div id="uploadArea" class="upload-area">
+          <input id="imageInput" type="file"
+            accept="image/png,image/jpeg,image/webp" hidden>
+
+          <div id="uploadText">
+            <div class="upload-icon">↑</div>
+            <p><strong>Upload your image</strong></p>
+            <button id="browseBtn" type="button">
+              Choose image
+            </button>
+            <small>PNG, JPG or WEBP · Max 10 MB</small>
+          </div>
+
+          <div id="previewBox" class="hidden">
+            <img id="previewImage" alt="Image preview">
+            <button id="removeImage" type="button">Remove image</button>
+          </div>
+        </div>
+
+        <label for="prompt">Describe your video</label>
+        <textarea id="prompt" maxlength="1200"
+          placeholder="A cinematic camera moves slowly as flowers sway in the wind..."></textarea>
+
+        <div class="settings">
+          <div>
+            <label for="ratio">Aspect ratio</label>
+            <select id="ratio">
+              <option value="16:9">Landscape 16:9</option>
+              <option value="9:16">Portrait 9:16</option>
+              <option value="1:1">Square 1:1</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="duration">Duration</label>
+            <select id="duration">
+              <option value="5">5 seconds</option>
+              <option value="4">4 seconds</option>
+              <option value="8">8 seconds</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="generateBtn" class="generate" type="button">
+          ✦ Generate Video
+        </button>
+
+        <p id="message" role="status"></p>
+      </div>
+
+      <div class="panel result-panel">
+        <h2>Your video</h2>
+
+        <div id="placeholder" class="placeholder">
+          <div class="result-icon">✧</div>
+          <h3>Your story starts here</h3>
+          <p>Your generated video will appear here.</p>
+        </div>
+
+        <video id="resultVideo" controls playsinline hidden></video>
+
+        <a id="downloadBtn" class="download" hidden
+          download="motionforge-video.mp4">
+          Download video
+        </a>
+
+        <p class="note">
+          AI generation requires a connected video API.
+          Free usage depends on the provider.
+        </p>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
