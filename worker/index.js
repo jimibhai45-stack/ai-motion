@@ -2,51 +2,69 @@ const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8"
 };
 
-function response(data, status, headers = {}) {
+function response(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { ...JSON_HEADERS, ...headers }
+    headers: {
+      ...JSON_HEADERS,
+      ...headers
+    }
   });
 }
 
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
     const origin = request.headers.get("Origin") || "";
     const allowedOrigin = env.ALLOWED_ORIGIN || "";
 
-    const headers = {
-      "Access-Control-Allow-Origin":
-        origin === allowedOrigin ? origin : "",
+    const originAllowed =
+      origin !== "" && origin === allowedOrigin;
+
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": originAllowed
+        ? origin
+        : "null",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Max-Age": "86400",
       "Vary": "Origin"
     };
 
     if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers });
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders
+      });
     }
 
-    const url = new URL(request.url);
-
-    if (url.pathname === "/health") {
+    if (url.pathname === "/health" && request.method === "GET") {
       return response({
         ok: true,
-        message: "AI Video API is running"
-      }, 200, headers);
+        service: "MotionForge AI Backend",
+        status: "running",
+        videoAI: "not connected"
+      }, 200, corsHeaders);
     }
 
     if (url.pathname !== "/generate") {
-      return response({ error: "Route not found" }, 404, headers);
+      return response({
+        error: "Route not found"
+      }, 404, corsHeaders);
     }
 
     if (request.method !== "POST") {
-      return response({ error: "Use POST request" }, 405, headers);
+      return response({
+        error: "POST request required"
+      }, 405, corsHeaders);
     }
 
-    if (!origin || origin !== allowedOrigin) {
+    if (!originAllowed) {
       return response({
-        error: "Website origin is not allowed"
-      }, 403, headers);
+        error: "Website origin is not allowed",
+        receivedOrigin: origin || "missing",
+        expectedOrigin: allowedOrigin || "not configured"
+      }, 403, corsHeaders);
     }
 
     let form;
@@ -56,28 +74,47 @@ export default {
     } catch {
       return response({
         error: "Invalid form data"
-      }, 400, headers);
+      }, 400, corsHeaders);
     }
 
     const mode = form.get("mode");
     const prompt = form.get("prompt");
+    const image = form.get("image");
 
-    if (!["image", "prompt"].includes(mode)) {
-      return response({ error: "Invalid video mode" }, 400, headers);
+    if (mode !== "image" && mode !== "prompt") {
+      return response({
+        error: "Invalid video mode"
+      }, 400, corsHeaders);
     }
 
     if (typeof prompt !== "string" || !prompt.trim()) {
-      return response({ error: "Please enter a prompt" }, 400, headers);
+      return response({
+        error: "Please enter a video prompt"
+      }, 400, corsHeaders);
     }
 
-    if (!env.HF_TOKEN) {
+    if (mode === "image" && !(image instanceof File)) {
       return response({
-        error: "AI provider token is not configured yet"
-      }, 503, headers);
+        error: "Please upload an image"
+      }, 400, corsHeaders);
+    }
+
+    if (image instanceof File) {
+      if (!image.type.startsWith("image/")) {
+        return response({
+          error: "Please upload a valid image"
+        }, 400, corsHeaders);
+      }
+
+      if (image.size > 10 * 1024 * 1024) {
+        return response({
+          error: "Image must be under 10 MB"
+        }, 413, corsHeaders);
+      }
     }
 
     return response({
-      error: "AI provider connection is not implemented yet. No video was generated."
-    }, 501, headers);
+      error: "AI video provider is not connected yet. No video was generated."
+    }, 503, corsHeaders);
   }
 };
