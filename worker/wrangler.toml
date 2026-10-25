@@ -1,0 +1,6 @@
+name = "motionforge-ai-api"
+main = "index.js"
+compatibility_date = "2026-10-24"
+
+[vars]
+ALLOWED_ORIGIN = "https://jimibhai45-stack.github.io"
